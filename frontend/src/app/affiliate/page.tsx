@@ -39,6 +39,17 @@ export default function AffiliateDashboard() {
     enabled: !!mockAffiliateId,
   });
 
+  // Fetch latest graphic for this affiliate
+  const { data: latestGraphic } = useQuery<AffiliateGraphic>({
+    queryKey: ['affiliate-latest-graphic', mockAffiliateId],
+    queryFn: async () => {
+      const res = await api.get('/api/affiliate/my-graphics/latest/');
+      return res.data;
+    },
+    enabled: !!mockAffiliateId,
+    retry: false,
+  });
+
   const handleLogout = () => {
     localStorage.removeItem('mock_role');
     localStorage.removeItem('mock_affiliate_id');
@@ -178,6 +189,44 @@ export default function AffiliateDashboard() {
             </div>
           </div>
         </div>
+
+        {/* Latest Graphic Section */}
+        {latestGraphic && (
+          <div className="glass-card p-6 rounded-3xl border border-violet-500/30 bg-gradient-to-r from-violet-600/10 via-background to-background relative overflow-hidden flex flex-col md:flex-row gap-6 items-center">
+            <div className="absolute top-0 right-0 w-[200px] h-[200px] bg-violet-600/10 rounded-full blur-[60px] pointer-events-none" />
+            <div className="w-full md:w-1/3 max-h-48 rounded-2xl overflow-hidden border border-violet-500/20 bg-black/20 flex items-center justify-center relative">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={latestGraphic.file_url}
+                alt={latestGraphic.original_filename}
+                className="object-contain w-full h-full max-h-48"
+              />
+              <span className="absolute top-3 left-3 px-2 py-0.5 rounded-full text-[9px] font-bold uppercase bg-violet-600 text-white shadow-lg">
+                Latest Release
+              </span>
+            </div>
+            <div className="flex-1 space-y-3">
+              <div className="space-y-1">
+                <span className="text-[10px] text-violet-400 font-bold uppercase tracking-wider block">
+                  Featured Graphic
+                </span>
+                <h3 className="text-xl font-extrabold text-white truncate" title={latestGraphic.original_filename}>
+                  {latestGraphic.original_filename}
+                </h3>
+                <p className="text-xs text-muted">
+                  Type: <span className="font-semibold text-white uppercase">{latestGraphic.graphic_type}</span> • Size: <span className="font-semibold text-white">{formatBytes(latestGraphic.file_size)}</span> • Released: {new Date(latestGraphic.created_at).toLocaleDateString()}
+                </p>
+              </div>
+              <button
+                onClick={() => triggerDownloads([latestGraphic.id])}
+                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-violet-600 hover:bg-violet-500 text-white font-bold text-xs shadow-lg shadow-violet-600/20 transition-all hover:scale-[1.02]"
+              >
+                <Download className="w-3.5 h-3.5" />
+                Download Latest Graphic
+              </button>
+            </div>
+          </div>
+        )}
 
         {/* Graphics Actions Bar */}
         {data?.graphics && data.graphics.length > 0 && (

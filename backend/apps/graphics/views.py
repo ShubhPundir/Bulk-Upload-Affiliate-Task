@@ -186,3 +186,42 @@ class AffiliateDownloadGraphicsView(APIView):
             })
             
         return Response({"downloads": downloads}, status=status.HTTP_200_OK)
+
+
+class AffiliateLatestGraphicView(APIView):
+    """
+    Returns the single latest marketing graphic for the affiliate.
+    """
+    permission_classes = []
+    
+    @extend_schema(
+        summary="Get Latest Graphic for Affiliate",
+        description="Returns the single latest active graphic assigned to the affiliate.",
+        responses={200: AffiliateGraphicSerializer}
+    )
+    def get(self, request):
+        affiliate = getattr(request.user, 'affiliate', None)
+        if not affiliate:
+            # Fallback to headers or database if not authenticated
+            affiliate_id = request.headers.get('X-Affiliate-ID') or request.META.get('HTTP_X_AFFILIATE_ID') or request.query_params.get('affiliate_id')
+            from apps.affiliates.models import Affiliate
+            if affiliate_id:
+                try:
+                    affiliate = Affiliate.objects.get(id=affiliate_id)
+                except (Affiliate.DoesNotExist, ValueError):
+                    pass
+            if not affiliate:
+                affiliate = Affiliate.objects.filter(is_active=True).first()
+                if not affiliate:
+                    affiliate = Affiliate.objects.first()
+
+        if not affiliate:
+            return Response({"error": "No affiliate found"}, status=status.HTTP_404_NOT_FOUND)
+
+        graphic = AffiliateGraphic.objects.filter(affiliate=affiliate).order_by('-created_at').first()
+        if not graphic:
+            return Response({"message": "No graphics found"}, status=status.HTTP_404_NOT_FOUND)
+
+        serializer = AffiliateGraphicSerializer(graphic)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
