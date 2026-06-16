@@ -15,6 +15,7 @@ urlpatterns = [
     # API Endpoints
     path('api/admin/affiliates/', include('apps.affiliates.urls')),
     path('api/admin/affiliate-graphics/', include('apps.graphics.urls_admin')),
+    path('api/admin/activity-logs/', include('apps.activity_logs.urls')),
     path('api/affiliate/', include('apps.graphics.urls_affiliate')),
 ]
 

@@ -3,7 +3,7 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Image, Upload, LogOut, ShieldAlert, Users } from 'lucide-react';
+import { Image, Upload, LogOut, ShieldAlert, Users, FileText } from 'lucide-react';
 import { useToast } from './ui/toast';
 
 export default function Sidebar() {
@@ -28,6 +28,11 @@ export default function Sidebar() {
       name: 'Bulk Upload',
       href: '/admin/upload',
       icon: Upload,
+    },
+    {
+      name: 'Activity Logs',
+      href: '/admin/activity-logs',
+      icon: FileText,
     },
   ];
 
