@@ -45,7 +45,7 @@ class AdminGraphicViewSet(viewsets.ModelViewSet):
             return Response({"error": "No files uploaded."}, status=status.HTTP_400_BAD_REQUEST)
             
         results = GraphicService.preview_upload(files)
-        return Response(results, status=status.HTTP_OK)
+        return Response(results, status=status.HTTP_200_OK)
 
     @extend_schema(
         summary="Bulk Save Graphics",
@@ -85,8 +85,11 @@ class AdminGraphicViewSet(viewsets.ModelViewSet):
         if not isinstance(mappings, list):
             return Response({"error": "Mappings must be a list of objects."}, status=status.HTTP_400_BAD_REQUEST)
             
-        # Extract files dictionary keyed by file name
-        files_dict = {f.name: f for f in request.FILES.values()}
+        # Extract files dictionary keyed by file name, handling multi-value fields correctly
+        files_list = []
+        for key in request.FILES:
+            files_list.extend(request.FILES.getlist(key))
+        files_dict = {f.name: f for f in files_list}
         
         try:
             saved_graphics = GraphicService.bulk_save(
@@ -130,7 +133,7 @@ class AffiliateMyGraphicsView(APIView):
         affiliate = request.user.affiliate
         graphics = AffiliateGraphic.objects.filter(affiliate=affiliate).order_by('-created_at')
         serializer = AffiliateGraphicSerializer(graphics, many=True)
-        return Response({"graphics": serializer.data}, status=status.HTTP_OK)
+        return Response({"graphics": serializer.data}, status=status.HTTP_200_OK)
 
 
 class AffiliateDownloadGraphicsView(APIView):
@@ -182,4 +185,4 @@ class AffiliateDownloadGraphicsView(APIView):
                 "download_url": download_url
             })
             
-        return Response({"downloads": downloads}, status=status.HTTP_OK)
+        return Response({"downloads": downloads}, status=status.HTTP_200_OK)
