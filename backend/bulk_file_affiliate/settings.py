@@ -65,7 +65,7 @@ TEMPLATES = [
     },
 ]
 
-WSGI_APPLICATION = 'bulk_file_affiliate.wsgi'
+WSGI_APPLICATION = 'bulk_file_affiliate.wsgi.application'
 
 # Database
 DATABASES = {
